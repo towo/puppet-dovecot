@@ -92,6 +92,7 @@ class dovecot (
     $lmtp_mail_plugins          = undef,
     $lmtp_save_to_detail_mailbox = false,
     # 20-pop3.conf
+    $write_pop3_conf            = true,
     $pop3_mail_plugins          = undef,
     $pop3_uidl_format           = undef,
     $pop3_client_workarounds    = undef,
@@ -193,6 +194,8 @@ class dovecot (
     # 20-lmtp.conf
     validate_bool($lmtp_save_to_detail_mailbox)
     validate_string($lmtp_mail_plugins)
+    # 20-pop3.conf
+    validate_bool($write_pop3_conf)
     # 20-managesieve.conf
     validate_bool($managesieve_service)
     validate_integer($managesieve_service_count)
@@ -332,10 +335,15 @@ class dovecot (
     file { "${directory}/conf.d/20-managesieve.conf":
         content => template('dovecot/conf.d/20-managesieve.conf.erb'),
     }
-    file { "${directory}/conf.d/20-pop3.conf":
-        content => template('dovecot/conf.d/20-pop3.conf.erb'),
+    if $write_pop3_conf {
+      file { "${directory}/conf.d/20-pop3.conf":
+          content => template('dovecot/conf.d/20-pop3.conf.erb'),
+      }
+    } else {
+      file { "${directory}/conf.d/20-pop3.conf":
+        ensure => absent,
+      }
     }
-    
     if $manage_sieve {
       file { "${directory}/conf.d/20-managesieve.conf":
           content => template('dovecot/conf.d/20-managesieve.conf.erb'),
